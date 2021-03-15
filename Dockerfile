@@ -1,23 +1,17 @@
-FROM debian:jessie AS gosu
+FROM node:12-stretch AS screeps
 
-RUN apt-get update && apt-get -y --no-install-recommends install \
-    ca-certificates \
-    curl \
-    wget
-
-ARG GOSU_VERSION=1.11
+ARG GOSU_VERSION=1.12
 RUN dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" \
     && wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch" \
     && chmod +x /usr/local/bin/gosu \
     && gosu nobody true 
 
-FROM node:10.16.3-stretch AS screeps
-ENV SCREEPS_VERSION 4.2.3
+ENV SCREEPS_VERSION 4.2.12
 WORKDIR /screeps
 RUN yarn add screeps@"$SCREEPS_VERSION"
 RUN yarn add screepsmod-mongo screepsmod-admin-utils screepsmod-auth screeps-bot-tooangel
 
-FROM node:10.16.3-stretch
+FROM node:12-stretch
 VOLUME /screeps
 WORKDIR /screeps
 
@@ -32,7 +26,7 @@ ENV DB_PATH=/screeps/db.json \
     CLI_HOST=0.0.0.0 \
     DRIVER_MODULE="@screeps/driver"
 
-COPY --from=gosu /usr/local/bin/gosu /usr/local/bin/gosu
+COPY --from=screeps /usr/local/bin/gosu /usr/local/bin/gosu
 COPY config.yml /screeps.base
 COPY custom_mods.json /screeps.base
 COPY start.sh /usr/local/bin/

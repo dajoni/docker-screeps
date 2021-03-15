@@ -2,7 +2,7 @@ version: "3.7"
 services:
   screeps:
     container_name: screeps
-    image: qnimbus/docker-screeps
+    image: daniel-screeps:4.2.12
     build: ./
     networks:
       - screeps
